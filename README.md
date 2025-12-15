@@ -1,6 +1,6 @@
 # NestJS Starter
 
-A production-ready NestJS starter template with authentication, authorization, and database integration.
+A production-ready NestJS starter template with authentication, authorization, database integration, and Docker support.
 
 ## Overview
 
@@ -20,6 +20,12 @@ This is a TypeScript-based NestJS starter project that provides a solid foundati
   - User and RefreshToken models
   - Database migrations
 
+- **Docker**
+  - Multi-stage Dockerfile for optimized production images
+  - Development setup with hot reload
+  - Docker Compose for easy orchestration
+  - Makefile shortcuts for common commands
+
 - **Configuration**
   - Environment-based configuration
   - Schema validation with Zod
@@ -38,61 +44,159 @@ This is a TypeScript-based NestJS starter project that provides a solid foundati
 - **Database:** PostgreSQL + Prisma
 - **Authentication:** Passport.js + JWT
 - **Validation:** class-validator, class-transformer, Zod
+- **Containerization:** Docker + Docker Compose
 
-## Project Setup
+## Quick Start with Docker
+
+```bash
+# Clone and enter the project
+cd nestjs-starter
+
+# Copy environment template
+cp .env.example .env
+# Edit .env with your JWT secrets
+
+# Start everything (production mode)
+make up-build
+
+# Or start in development mode (with hot reload)
+make dev
+```
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Application
+NODE_ENV=development
+PORT=3000
+
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5433/nestjs_starter?schema=public
+
+# JWT Secrets (generate secure random strings for production!)
+JWT_ACCESS_TOKEN_SECRET=your-super-secret-access-token-key
+JWT_REFRESH_TOKEN_SECRET=your-super-secret-refresh-token-key
+JWT_ACCESS_TOKEN_EXPIRATION=15m
+JWT_REFRESH_TOKEN_EXPIRATION=7d
+```
+
+## Development Options
+
+### Option 1: Full Docker (Recommended for consistency)
+
+```bash
+make dev            # Start app + database with hot reload
+make dev-logs       # View logs
+make dev-down       # Stop everything
+```
+
+### Option 2: Local NestJS + Docker Database (Fastest hot reload)
+
+```bash
+make dev-local      # Start database + run NestJS locally
+```
+
+### Option 3: Fully Local
+
+```bash
+# Requires local PostgreSQL installation
+npm install
+npx prisma migrate dev
+npm run start:dev
+```
+
+## Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make up` | Start containers (production) |
+| `make up-build` | Rebuild and start containers |
+| `make down` | Stop containers |
+| `make down-clean` | Stop containers and remove volumes |
+| `make restart` | Restart containers |
+| `make build` | Build containers |
+| `make logs` | Follow all container logs |
+| `make logs-app` | Follow app logs only |
+| `make logs-db` | Follow database logs only |
+| `make shell` | Open shell in app container |
+| `make db-shell` | Open PostgreSQL CLI |
+| `make migrate` | Run migrations in container |
+| `make migrate-dev` | Run migrations locally |
+| `make studio` | Open Prisma Studio |
+| `make dev` | Start development environment (Docker) |
+| `make dev-down` | Stop development environment |
+| `make dev-rebuild` | Rebuild dev environment (no cache) |
+| `make dev-logs` | Follow dev app logs |
+| `make dev-local` | Local NestJS + Docker database |
+| `make install` | Install dependencies (npm ci) |
+| `make clean` | Remove containers, volumes, and node_modules |
+| `make help` | Show all available commands |
+
+## Project Setup (Without Docker)
 
 ```bash
 # Install dependencies
-$ npm install
+npm install
 
 # Set up environment variables
-# Create a .env file with your configuration
+cp .env.example .env
 
 # Run database migrations
-$ npx prisma migrate dev
+npx prisma migrate dev
 
 # Generate Prisma client
-$ npx prisma generate
+npx prisma generate
 ```
 
 ## Running the Application
 
 ```bash
 # development
-$ npm run start
+npm run start
 
 # watch mode
-$ npm run start:dev
+npm run start:dev
 
 # production mode
-$ npm run start:prod
+npm run start:prod
 ```
 
 ## Testing
 
 ```bash
 # unit tests
-$ npm run test
+npm run test
 
 # e2e tests
-$ npm run test:e2e
+npm run test:e2e
 
 # test coverage
-$ npm run test:cov
+npm run test:cov
 ```
 
 ## Project Structure
 
 ```
-src/
-├── auth/               # Authentication module
-│   ├── decorators/     # Custom decorators (@CurrentUser, @Public, @Roles)
-│   ├── dto/            # Data transfer objects
-│   ├── guards/         # Route guards (JWT, Roles)
-│   └── strategies/     # Passport strategies
-├── config/             # Configuration management
-├── database/           # Prisma service and module
-└── main.ts             # Application entry point
+├── prisma/
+│   ├── schema.prisma       # Database schema
+│   └── migrations/         # Database migrations
+├── src/
+│   ├── auth/               # Authentication module
+│   │   ├── decorators/     # Custom decorators (@CurrentUser, @Public, @Roles)
+│   │   ├── dto/            # Data transfer objects
+│   │   ├── guards/         # Route guards (JWT, Roles)
+│   │   └── strategies/     # Passport strategies
+│   ├── config/             # Configuration management
+│   ├── database/           # Prisma service and module
+│   └── main.ts             # Application entry point
+├── Dockerfile              # Production Docker image
+├── Dockerfile.dev          # Development Docker image
+├── docker-compose.yml      # Production compose config
+├── docker-compose.dev.yml  # Development compose config
+├── Makefile                # Command shortcuts
+└── .env.example            # Environment template
 ```
 
 ## API Endpoints
